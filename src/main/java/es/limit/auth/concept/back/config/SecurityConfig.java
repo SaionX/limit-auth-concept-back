@@ -5,6 +5,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.Collections;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
@@ -14,6 +19,7 @@ public class SecurityConfig { // extends WebSecurityConfigurerAdapter {
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf().disable()
+                .cors().configurationSource(corsConfigurationSource()).and()
                 .authorizeExchange()
                 .pathMatchers("/").hasAuthority("LIM_USER")
                 .anyExchange().authenticated()
@@ -24,6 +30,18 @@ public class SecurityConfig { // extends WebSecurityConfigurerAdapter {
                 .jwtAuthenticationConverter(new CustomJwtGrantedAuthoritiesConverter())
                 .and().and()
                 .build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+        configuration.setAllowedMethods(Collections.singletonList("GET"));
+        configuration.setAllowedHeaders(Collections.singletonList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 //    ReactiveJwtAuthenticationConverterAdapter grantedAuthoritiesExtractor() {
